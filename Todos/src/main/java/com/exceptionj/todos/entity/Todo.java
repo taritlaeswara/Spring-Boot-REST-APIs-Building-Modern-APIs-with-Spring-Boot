@@ -1,11 +1,14 @@
 package com.exceptionj.todos.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "todos")
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

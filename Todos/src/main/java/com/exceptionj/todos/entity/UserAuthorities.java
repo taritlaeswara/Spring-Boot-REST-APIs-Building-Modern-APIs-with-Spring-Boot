@@ -2,11 +2,14 @@ package com.exceptionj.todos.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 @Embeddable
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class UserAuthorities implements GrantedAuthority {
 
     private String authority;
