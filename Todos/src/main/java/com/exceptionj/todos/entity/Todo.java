@@ -24,10 +24,18 @@ public class Todo {
     @Column(nullable = false)
     private int priority;
 
-    @Column(nullable = false)
-    private boolean complete;
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean complete = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id",nullable = false)
     private User owner;
+
+    public Todo(String title, String description, int priority, boolean complete, User owner) {
+        this.title = title;
+        this.description = description;
+        this.priority = priority;
+        this.complete = complete;
+        this.owner = owner;
+    }
 }
