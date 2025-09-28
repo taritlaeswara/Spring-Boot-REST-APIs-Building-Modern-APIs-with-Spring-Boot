@@ -61,8 +61,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(configurer->
                 configurer
-                        .requestMatchers("/swagger-ui/**","/api/auth/**","/swagger-resources/**","/webjars/**","/docs", "/v3/api-docs/**",
-                                "/swagger-ui.html").permitAll().anyRequest().authenticated());
+                        .requestMatchers("/swagger-ui/**",
+                                "/api/auth/**",
+                                "/swagger-resources/**",
+                                "/webjars/**","/docs", "/v3/api-docs/**",
+                                "/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN").anyRequest().authenticated());
         httpSecurity.csrf(csrf->csrf.disable());
 
             httpSecurity.exceptionHandling(exceptions->

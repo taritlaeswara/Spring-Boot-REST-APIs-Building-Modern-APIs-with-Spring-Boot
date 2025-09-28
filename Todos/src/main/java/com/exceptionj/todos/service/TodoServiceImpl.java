@@ -6,8 +6,15 @@ import com.exceptionj.todos.repository.TodoRepository;
 import com.exceptionj.todos.request.TodoRequest;
 import com.exceptionj.todos.response.TodoResponse;
 import com.exceptionj.todos.util.FindAuthenticatedUser;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class TodoServiceImpl  implements TodoService{
@@ -33,14 +40,51 @@ public class TodoServiceImpl  implements TodoService{
         );
         Todo savedTodo = todoRepository.save(todo);
 
-        TodoResponse todoResponse = new TodoResponse(
-                savedTodo.getId(),
-                savedTodo.getTitle(),
-                savedTodo.getDescription(),
-                savedTodo.getPriority(),
-                savedTodo.isComplete()
-        );
+        TodoResponse todoResponse = convertToResponse(savedTodo);
 
         return todoResponse;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TodoResponse> getAllTodos() {
+        User authenticatedUser = findAuthenticatedUser.getAuthenticatedUser();
+        List<Todo> todos = todoRepository.findByOwner(authenticatedUser);
+        return todos.stream().map(this::convertToResponse).toList();
+    }
+
+    @Override
+    @Transactional
+    public TodoResponse toggleTodoCompletion(Long id) {
+        User authenticatedUser = findAuthenticatedUser.getAuthenticatedUser();
+
+        Optional<Todo> todo = todoRepository.findByIdAndOwner(id,authenticatedUser);
+        if(todo.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Todo not found");
+        }
+        todo.get().setComplete(!todo.get().isComplete());
+        return convertToResponse(todoRepository.save(todo.get()));
+    }
+
+    @Override
+    @Transactional
+    public void deleteTodo(Long id) {
+        User authenticatedUser = findAuthenticatedUser.getAuthenticatedUser();
+
+        Optional<Todo> todo = todoRepository.findByIdAndOwner(id,authenticatedUser);
+        if(todo.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found");
+        }
+        todoRepository.delete(todo.get());
+    }
+
+    private TodoResponse convertToResponse(Todo todo) {
+        return new TodoResponse(
+                todo.getId(),
+                todo.getTitle(),
+                todo.getDescription(),
+                todo.getPriority(),
+                todo.isComplete()
+        );
     }
 }
